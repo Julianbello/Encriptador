@@ -5,37 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Encriptador</title>
 <style>
-:root{--bg:#f4f5f7;--fg:#1b1d22;--card:#fff;--line:#d9dce2;--red:#e11d2e;--blue:#1d6fe0;--err:#b3261e;--hl:#fff4c2}
-@media (prefers-color-scheme:dark){:root{--bg:#14161a;--fg:#eceef2;--card:#1e2127;--line:#343842;--err:#ff8a80;--hl:#4a4217}}
+:root{--fg:#eaffee;--glow:#00ff66;--line:rgba(60,255,130,.28)}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.screen{display:none;min-height:100%;box-sizing:border-box}
+body{color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(ellipse at 50% 30%,#0b4a24 0%,#05200f 55%,#010805 100%);background-attachment:fixed}
+#rain{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:.9}
+.vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.65) 100%)}
+.screen{display:none;min-height:100%;box-sizing:border-box;position:relative;z-index:1}
 .screen.on{display:block}
 #home.on{display:flex;flex-direction:column;height:100%}
-h1{margin:0;padding:22px;text-align:center;font-size:28px;letter-spacing:1px}
+h1{margin:0;padding:26px 22px 20px;text-align:center;font-size:30px;letter-spacing:4px;color:var(--fg);text-shadow:0 0 12px var(--glow),0 0 30px rgba(0,255,102,.5)}
 .pair{flex:1;display:flex;gap:28px;padding:0 28px 28px;position:relative}
-.opt{flex:1;border:0;border-radius:24px;color:#fff;font-size:34px;font-weight:700;cursor:pointer;transition:transform .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:inherit}
-.opt small{font-size:16px;font-weight:400;opacity:.9}
-.opt:hover{transform:scale(1.02)}
-.opt.r{background:var(--red)}.opt.b{background:var(--blue)}
-.or{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-weight:800;font-size:18px;box-shadow:0 2px 10px #0004;pointer-events:none}
-.panel{max-width:760px;margin:0 auto;padding:24px}
-.back{background:none;border:1px solid var(--line);color:var(--fg);padding:8px 16px;border-radius:10px;cursor:pointer;font-size:15px;font-family:inherit}
-.panel h2{margin:18px 0 6px}
-.panel p{margin:0 0 14px;opacity:.8}
-textarea{width:100%;box-sizing:border-box;min-height:100px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:18px;font-family:inherit;resize:vertical}
-.go{margin-top:12px;border:0;color:#fff;padding:12px 28px;border-radius:12px;font-size:17px;font-weight:600;cursor:pointer;font-family:inherit}
-.go.r{background:var(--red)}.go.b{background:var(--blue)}
-.msg{margin-top:16px;padding:12px 14px;border-radius:12px;border:1px solid var(--err);color:var(--err);display:none}
-.step{margin-top:14px;padding:14px;border-radius:12px;background:var(--hl);border:1px solid var(--line);display:none}
-.step b{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.5px;opacity:.7;margin-bottom:6px}
-.step code{font-size:24px;font-weight:700;word-break:break-all;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace}
-.mono{font-size:84px;line-height:1;text-align:center;margin:8px 0 4px;user-select:none}
+.opt{flex:1;border:1px solid rgba(255,255,255,.18);border-radius:26px;color:#fff;font-size:36px;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:inherit;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+.opt small{font-size:16px;font-weight:400;opacity:.92}
+.opt.r{background:linear-gradient(145deg,#ff3b4a,#a80f1c);box-shadow:0 0 40px rgba(255,59,74,.35)}
+.opt.b{background:linear-gradient(145deg,#3b8cff,#0f4aae);box-shadow:0 0 40px rgba(59,140,255,.35)}
+.opt.r:hover{transform:scale(1.025);box-shadow:0 0 60px rgba(255,59,74,.6)}
+.opt.b:hover{transform:scale(1.025);box-shadow:0 0 60px rgba(59,140,255,.6)}
+.or{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-weight:800;font-size:18px;box-shadow:0 0 22px rgba(255,255,255,.55);pointer-events:none}
+.panel{max-width:760px;margin:28px auto;padding:26px;border-radius:22px;background:rgba(3,18,9,.74);border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 0 50px rgba(0,255,100,.14)}
+.back{background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--fg);padding:8px 16px;border-radius:10px;cursor:pointer;font-size:15px;font-family:inherit;transition:background .2s}
+.back:hover{background:rgba(60,255,130,.15)}
+.panel h2{margin:10px 0 6px;text-shadow:0 0 12px rgba(0,255,102,.55)}
+.panel p{margin:0 0 14px;opacity:.82}
+textarea{width:100%;box-sizing:border-box;min-height:100px;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.45);color:var(--fg);font-size:18px;font-family:inherit;resize:vertical;outline:none;transition:box-shadow .2s,border-color .2s}
+textarea:focus{border-color:var(--glow);box-shadow:0 0 16px rgba(0,255,102,.35)}
+.go{margin-top:12px;border:0;color:#fff;padding:12px 30px;border-radius:12px;font-size:17px;font-weight:600;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .2s}
+.go:hover{transform:translateY(-2px)}
+.go.r{background:linear-gradient(145deg,#ff3b4a,#b3121f);box-shadow:0 0 18px rgba(255,59,74,.4)}
+.go.b{background:linear-gradient(145deg,#3b8cff,#1250b8);box-shadow:0 0 18px rgba(59,140,255,.4)}
+.msg{margin-top:16px;padding:12px 14px;border-radius:12px;border:1px solid #ff6b60;background:rgba(179,38,30,.22);color:#ffb3ac;display:none}
+.step{margin-top:16px;padding:14px;border-radius:12px;background:rgba(60,255,130,.1);border:1px solid var(--line);display:none}
+.step b{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.8px;opacity:.75;margin-bottom:6px}
+.step code{font-size:24px;font-weight:700;word-break:break-all;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;color:#8dffb8;text-shadow:0 0 10px rgba(0,255,102,.6)}
+.mono{font-size:84px;line-height:1;text-align:center;margin:8px 0 4px;user-select:none;filter:drop-shadow(0 0 14px rgba(0,255,102,.45))}
 .mono.pop{animation:pop .45s}
 @keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
+
+<canvas id="rain"></canvas>
+<div class="vignette"></div>
 
 <section id="home" class="screen on">
   <h1>¿QUÉ PREFIERES?</h1>
@@ -69,6 +81,48 @@ textarea{width:100%;box-sizing:border-box;min-height:100px;padding:12px;border-r
 </div></section>
 
 <script>
+// ===== Fondo: lluvia de código =====
+(function(){
+  const cv=document.getElementById('rain'),cx=cv.getContext('2d');
+  const SET='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const fs=18;
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let cols,drops,last=0,frames=0;
+  function size(){
+    cv.width=innerWidth;cv.height=innerHeight;
+    cols=Math.ceil(cv.width/fs);
+    drops=Array.from({length:cols},()=>Math.random()*-60);
+  }
+  size();addEventListener('resize',size);
+  function frame(t){
+    if(t-last>55){
+      last=t;frames++;
+      // desvanece lo anterior (deja la estela)
+      cx.globalCompositeOperation='destination-out';
+      cx.fillStyle='rgba(0,0,0,0.1)';
+      cx.fillRect(0,0,cv.width,cv.height);
+      cx.globalCompositeOperation='source-over';
+      cx.font=fs+'px ui-monospace,Consolas,monospace';
+      for(let i=0;i<cols;i++){
+        const y=drops[i]*fs;
+        if(y>0){
+          const ch=SET[Math.floor(Math.random()*SET.length)];
+          cx.shadowColor='#00ff66';cx.shadowBlur=10;
+          cx.fillStyle=Math.random()<0.04?'#ffffff':'#7dffb0';
+          cx.fillText(ch,i*fs,y);
+        }
+        if(y>cv.height&&Math.random()>0.975) drops[i]=0;
+        drops[i]+=1;
+      }
+      cx.shadowBlur=0;
+    }
+    if(reduce&&frames>150) return;   // si el usuario pidió menos movimiento, se detiene
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// ===== Encriptador =====
 // Tabla principal: cada carácter tiene un código de 2 dígitos (01 a 77)
 const CHARS='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 áéíóúüñÁÉÍÓÚÜÑ';
 // Paso 2: dígito 0..9 -> letra
