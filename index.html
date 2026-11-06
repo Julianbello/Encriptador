@@ -30,6 +30,9 @@ textarea{width:100%;box-sizing:border-box;min-height:100px;padding:12px;border-r
 .step{margin-top:14px;padding:14px;border-radius:12px;background:var(--hl);border:1px solid var(--line);display:none}
 .step b{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.5px;opacity:.7;margin-bottom:6px}
 .step code{font-size:24px;font-weight:700;word-break:break-all;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace}
+.mono{font-size:84px;line-height:1;text-align:center;margin:8px 0 4px;user-select:none}
+.mono.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -45,6 +48,7 @@ textarea{width:100%;box-sizing:border-box;min-height:100px;padding:12px;border-r
 
 <section id="enc" class="screen"><div class="panel">
   <button class="back" onclick="go('home')">← Volver</button>
+  <div class="mono" id="monoEnc">🐵</div>
   <h2>Encriptar</h2>
   <p>Escribe cualquier frase: letras, números, espacios o caracteres especiales.</p>
   <textarea id="encIn" placeholder="Ejemplo: Cas"></textarea>
@@ -55,6 +59,7 @@ textarea{width:100%;box-sizing:border-box;min-height:100px;padding:12px;border-r
 
 <section id="dec" class="screen"><div class="panel">
   <button class="back" onclick="go('home')">← Volver</button>
+  <div class="mono" id="monoDec">🙈</div>
   <h2>Desencriptar</h2>
   <p>Pega el texto encriptado (solo las letras k r m l p z b h c t).</p>
   <textarea id="decIn" placeholder="Ejemplo: mtkrrt"></textarea>
@@ -70,16 +75,28 @@ const CHARS='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 áé
 const LETRAS='krmlpzbhct';
 const $=id=>document.getElementById(id);
 
+// Cambia el mono con una animación
+function mono(id,emoji){
+  const m=$(id);
+  m.textContent=emoji;
+  m.classList.remove('pop');
+  void m.offsetWidth;
+  m.classList.add('pop');
+}
+
 function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   $(id).classList.add('on');
   document.querySelectorAll('.msg,.step').forEach(e=>e.style.display='none');
   $('encIn').value='';$('decIn').value='';
+  $('monoEnc').textContent='🐵';   // encriptar: empieza mirando
+  $('monoDec').textContent='🙈';   // desencriptar: empieza tapándose los ojos
 }
 function error(id,t){const e=$(id);e.textContent='❌ '+t;e.style.display='block';}
 
 function encriptar(){
   ['encErr','encS2'].forEach(i=>$(i).style.display='none');
+  $('monoEnc').textContent='🐵';
   const t=$('encIn').value;
   if(!t) return error('encErr','Escribe una frase primero.');
   let p1='';
@@ -91,10 +108,12 @@ function encriptar(){
   const p2=[...p1].map(d=>LETRAS[+d]).join('');
   $('encS2v').textContent=p2;
   $('encS2').style.display='block';
+  mono('monoEnc','🙈');   // se tapa los ojos al encriptar
 }
 
 function desencriptar(){
   ['decErr','decS2'].forEach(i=>$(i).style.display='none');
+  $('monoDec').textContent='🙈';
   const t=$('decIn').value.trim();
   if(!t) return error('decErr','Escribe el texto encriptado primero.');
   const malos=[...new Set([...t].filter(c=>!LETRAS.includes(c)))];
@@ -120,6 +139,7 @@ function desencriptar(){
   }
   $('decS2v').textContent=out;
   $('decS2').style.display='block';
+  mono('monoDec','🐵');   // abre los ojos al desencriptar
 }
 </script>
 </body>
