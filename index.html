@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encriptador</title>
+<style>
+:root{--bg:#f4f5f7;--fg:#1b1d22;--card:#fff;--line:#d9dce2;--red:#e11d2e;--blue:#1d6fe0;--err:#b3261e;--hl:#fff4c2}
+@media (prefers-color-scheme:dark){:root{--bg:#14161a;--fg:#eceef2;--card:#1e2127;--line:#343842;--err:#ff8a80;--hl:#4a4217}}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.screen{display:none;min-height:100%;box-sizing:border-box}
+.screen.on{display:block}
+#home.on{display:flex;flex-direction:column;height:100%}
+h1{margin:0;padding:22px;text-align:center;font-size:28px;letter-spacing:1px}
+.pair{flex:1;display:flex;gap:28px;padding:0 28px 28px;position:relative}
+.opt{flex:1;border:0;border-radius:24px;color:#fff;font-size:34px;font-weight:700;cursor:pointer;transition:transform .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:inherit}
+.opt small{font-size:16px;font-weight:400;opacity:.9}
+.opt:hover{transform:scale(1.02)}
+.opt.r{background:var(--red)}.opt.b{background:var(--blue)}
+.or{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-weight:800;font-size:18px;box-shadow:0 2px 10px #0004;pointer-events:none}
+.panel{max-width:760px;margin:0 auto;padding:24px}
+.back{background:none;border:1px solid var(--line);color:var(--fg);padding:8px 16px;border-radius:10px;cursor:pointer;font-size:15px;font-family:inherit}
+.panel h2{margin:18px 0 6px}
+.panel p{margin:0 0 14px;opacity:.8}
+textarea{width:100%;box-sizing:border-box;min-height:100px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:18px;font-family:inherit;resize:vertical}
+.go{margin-top:12px;border:0;color:#fff;padding:12px 28px;border-radius:12px;font-size:17px;font-weight:600;cursor:pointer;font-family:inherit}
+.go.r{background:var(--red)}.go.b{background:var(--blue)}
+.msg{margin-top:16px;padding:12px 14px;border-radius:12px;border:1px solid var(--err);color:var(--err);display:none}
+.step{margin-top:14px;padding:14px;border-radius:12px;background:var(--hl);border:1px solid var(--line);display:none}
+.step b{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.5px;opacity:.7;margin-bottom:6px}
+.step code{font-size:24px;font-weight:700;word-break:break-all;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace}
+</style>
+</head>
+<body>
+
+<section id="home" class="screen on">
+  <h1>¿QUÉ PREFIERES?</h1>
+  <div class="pair">
+    <button class="opt r" onclick="go('enc')">Encriptar<small>Frase → código secreto</small></button>
+    <button class="opt b" onclick="go('dec')">Desencriptar<small>Código secreto → frase</small></button>
+    <div class="or">OR</div>
+  </div>
+</section>
+
+<section id="enc" class="screen"><div class="panel">
+  <button class="back" onclick="go('home')">← Volver</button>
+  <h2>Encriptar</h2>
+  <p>Escribe cualquier frase: letras, números, espacios o caracteres especiales.</p>
+  <textarea id="encIn" placeholder="Ejemplo: Cas"></textarea>
+  <button class="go r" onclick="encriptar()">Encriptar</button>
+  <div class="msg" id="encErr"></div>
+  <div class="step" id="encS2"><b>Paso 2: resultado encriptado</b><code id="encS2v"></code></div>
+</div></section>
+
+<section id="dec" class="screen"><div class="panel">
+  <button class="back" onclick="go('home')">← Volver</button>
+  <h2>Desencriptar</h2>
+  <p>Pega el texto encriptado (solo las letras k r m l p z b h c t).</p>
+  <textarea id="decIn" placeholder="Ejemplo: mtkrrt"></textarea>
+  <button class="go b" onclick="desencriptar()">Desencriptar</button>
+  <div class="msg" id="decErr"></div>
+  <div class="step" id="decS2"><b>Frase original</b><code id="decS2v"></code></div>
+</div></section>
+
+<script>
+// Tabla principal: cada carácter tiene un código de 2 dígitos (01 a 77)
+const CHARS='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 áéíóúüñÁÉÍÓÚÜÑ';
+// Paso 2: dígito 0..9 -> letra
+const LETRAS='krmlpzbhct';
+const $=id=>document.getElementById(id);
+
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $(id).classList.add('on');
+  document.querySelectorAll('.msg,.step').forEach(e=>e.style.display='none');
+  $('encIn').value='';$('decIn').value='';
+}
+function error(id,t){const e=$(id);e.textContent='❌ '+t;e.style.display='block';}
+
+function encriptar(){
+  ['encErr','encS2'].forEach(i=>$(i).style.display='none');
+  const t=$('encIn').value;
+  if(!t) return error('encErr','Escribe una frase primero.');
+  let p1='';
+  for(const c of t){
+    const i=CHARS.indexOf(c);
+    if(i>=0) p1+=String(i+1).padStart(2,'0');                          // carácter normal: 2 dígitos
+    else p1+='00'+String(c.codePointAt(0)).padStart(7,'0');            // especial: 00 + código Unicode (7 dígitos)
+  }
+  const p2=[...p1].map(d=>LETRAS[+d]).join('');
+  $('encS2v').textContent=p2;
+  $('encS2').style.display='block';
+}
+
+function desencriptar(){
+  ['decErr','decS2'].forEach(i=>$(i).style.display='none');
+  const t=$('decIn').value.trim();
+  if(!t) return error('decErr','Escribe el texto encriptado primero.');
+  const malos=[...new Set([...t].filter(c=>!LETRAS.includes(c)))];
+  if(malos.length) return error('decErr','Texto no válido: solo puede tener las letras '+[...LETRAS].join(' ')+'. Sobra: '+malos.join(' ')+'.');
+  const p1=[...t].map(l=>LETRAS.indexOf(l)).join('');
+  let out='',i=0;
+  while(i<p1.length){
+    const n=p1.slice(i,i+2);
+    if(n.length<2) return error('decErr','Texto no válido: está incompleto.');
+    if(n==='00'){
+      const s=p1.slice(i+2,i+9);
+      if(s.length<7) return error('decErr','Texto no válido: está incompleto.');
+      const cp=parseInt(s,10);
+      if(cp>0x10FFFF||(cp>=0xD800&&cp<=0xDFFF)) return error('decErr','Texto no válido: hay un código que no corresponde a ningún carácter.');
+      out+=String.fromCodePoint(cp);
+      i+=9;
+    }else{
+      const k=parseInt(n,10);
+      if(k>CHARS.length) return error('decErr','Texto no válido: el código '+n+' no corresponde a ningún carácter.');
+      out+=CHARS[k-1];
+      i+=2;
+    }
+  }
+  $('decS2v').textContent=out;
+  $('decS2').style.display='block';
+}
+</script>
+</body>
+</html>
